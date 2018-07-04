@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Requests\Auth\LoginRequest;
+use Flugg\Responder\Http\Responses\ErrorResponseBuilder;
+use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterFormRequest;
@@ -17,59 +19,41 @@ class AuthController extends Controller
 {
 	/**
 	 * @param RegisterFormRequest $request
-	 * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+	 * @return SuccessResponseBuilder
 	 */
 	public function register (RegisterFormRequest $request)
 	{
 		$user = User::create($request->all());
 
-		return response([
-			'status' => 'success',
-			'data'   => $user,
-		]);
+		return $this->success($user);
 	}
 
 	/**
-	 * @param Request $request
-	 * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+	 * @param LoginRequest $request
+	 * @return ErrorResponseBuilder|SuccessResponseBuilder
 	 */
-	public function login (Request $request)
+	public function login (LoginRequest $request)
 	{
 		$credentials = $request->only('name', 'password');
 
-		if ( ! $token = JWTAuth::attempt($credentials)) {
-			return response([
-				'status' => 'error',
-				'error'  => 'invalid.credentials',
-				'msg'    => 'Invalid Credentials.',
-			], 400);
-		}
-		return response([
-			'status' => 'success',
-			'token'  => $token,
-		]);
+		if ( ! $token = JWTAuth::attempt($credentials))
+			return $this->error(400, 'Invalid Credentials.');
+
+		return $this->success($token);
 	}
 
 	/**
-	 * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+	 * @return SuccessResponseBuilder
 	 */
 	public function user ()
 	{
-		/** @noinspection PhpDynamicAsStaticMethodCallInspection */
-		$user = User::find(Auth::user()->id);
+		$user = Auth::user();
 
-		return response([
-			'status' => 'success',
-			'data'   => $user,
-		]);
+		return $this->success($user);
 	}
 
 	/**
-	 * Log out
-	 * Invalidate the token, so user cannot use it anymore
-	 * They have to relogin to get a new token
-	 *
-	 * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+	 * @return ErrorResponseBuilder|SuccessResponseBuilder
 	 */
 	public function logout ()
 	{
@@ -79,25 +63,18 @@ class AuthController extends Controller
 
 			JWTAuth::invalidate($token);
 
-			return response([
-				'status'  => 'success',
-				'message' => 'You have successfully logged out.',
-			]);
+			return $this->success();
+
 		} catch (\Exception $exception) {
-			return response([
-				'status'  => 'error',
-				'message' => $exception->getMessage(),
-			]);
+			return $this->error(400, $exception->getMessage());
 		}
 	}
 
 	/**
-	 * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
+	 * @return SuccessResponseBuilder
 	 */
 	public function refresh ()
 	{
-		return response([
-			'status' => 'success',
-		]);
+		return $this->success();
 	}
 }
