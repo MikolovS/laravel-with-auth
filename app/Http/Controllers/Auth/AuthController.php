@@ -6,8 +6,8 @@ use App\Http\Requests\Auth\LoginRequest;
 use Flugg\Responder\Http\Responses\ErrorResponseBuilder;
 use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Auth;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterFormRequest;
 
@@ -58,8 +58,7 @@ class AuthController extends Controller
 	public function logout ()
 	{
 		try {
-			$token = JWTAuth::getToken()
-			                ->get();
+			$token = JWTAuth::getToken()->get();
 
 			JWTAuth::invalidate($token);
 
