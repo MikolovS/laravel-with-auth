@@ -1,0 +1,1 @@
+ Response https://github.com/flugger/laravel-responder - ответы апи, обработка исключений.

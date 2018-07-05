@@ -3,7 +3,8 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+//use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Flugg\Responder\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
@@ -26,12 +27,13 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    /**
-     * Report or log an exception.
-     *
-     * @param  \Exception  $exception
-     * @return void
-     */
+	/**
+	 * Report or log an exception.
+	 *
+	 * @param  \Exception $exception
+	 * @return void
+	 * @throws Exception
+	 */
     public function report(Exception $exception)
     {
         parent::report($exception);
@@ -42,7 +44,7 @@ class Handler extends ExceptionHandler
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function render($request, Exception $exception)
     {
