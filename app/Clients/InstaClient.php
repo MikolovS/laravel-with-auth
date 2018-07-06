@@ -14,12 +14,6 @@ use InstagramAPI\Instagram;
  */
 class InstaClient
 {
-	public function __construct ()
-	{
-		# stupid package security
-		Instagram::$allowDangerousWebUsageAtMyOwnRisk = true;
-	}
-
 	/**
 	 * Get random instagram bot's login data
 	 *
@@ -51,14 +45,21 @@ class InstaClient
 	 * Get logged instagram model
 	 *
 	 * @param BotAccount|null $botAccount
+	 * @param array|null      $storageConfig
 	 * @return Instagram
 	 */
-	public static function make (BotAccount $botAccount = null) : Instagram
+	public static function make (BotAccount $botAccount = null, array $storageConfig = null) : Instagram
 	{
 		if (is_null($botAccount))
 			$botAccount = self::getBot();
 
-		$instagram = new Instagram(false, false, self::getDefaultStorage());
+		if (is_null($storageConfig))
+			$storageConfig = self::getDefaultStorage();
+
+		# stupid package security
+		Instagram::$allowDangerousWebUsageAtMyOwnRisk = true;
+
+		$instagram = new Instagram(false, false, $storageConfig);
 
 		$instagram->login($botAccount->name, $botAccount->password);
 
