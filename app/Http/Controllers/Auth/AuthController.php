@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\Auth\LoginRequest;
 use Flugg\Responder\Http\Responses\ErrorResponseBuilder;
+use Flugg\Responder\Http\Responses\ResponseBuilder;
 use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -21,7 +22,7 @@ class AuthController extends Controller
 	 * @param RegisterFormRequest $request
 	 * @return SuccessResponseBuilder
 	 */
-	public function register (RegisterFormRequest $request)
+	public function register (RegisterFormRequest $request) : ResponseBuilder
 	{
 		$user = User::create($request->all());
 
@@ -32,20 +33,20 @@ class AuthController extends Controller
 	 * @param LoginRequest $request
 	 * @return ErrorResponseBuilder|SuccessResponseBuilder
 	 */
-	public function login (LoginRequest $request)
+	public function login (LoginRequest $request) : ResponseBuilder
 	{
 		$credentials = $request->only('name', 'password');
 
 		if ( ! $token = JWTAuth::attempt($credentials))
 			return $this->error(400, 'Invalid Credentials.');
 
-		return $this->success($token);
+		return $this->success(['token' => $token]);
 	}
 
 	/**
 	 * @return SuccessResponseBuilder
 	 */
-	public function user ()
+	public function user () : ResponseBuilder
 	{
 		$user = Auth::user();
 
@@ -55,7 +56,7 @@ class AuthController extends Controller
 	/**
 	 * @return ErrorResponseBuilder|SuccessResponseBuilder
 	 */
-	public function logout ()
+	public function logout () : ResponseBuilder
 	{
 		try {
 			$token = JWTAuth::getToken()->get();
@@ -72,7 +73,7 @@ class AuthController extends Controller
 	/**
 	 * @return SuccessResponseBuilder
 	 */
-	public function refresh ()
+	public function refresh () : ResponseBuilder
 	{
 		return $this->success();
 	}

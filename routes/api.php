@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 # ip:port/api/
 Route::group([
@@ -6,20 +7,28 @@ Route::group([
 		'api',
 	],
 ], function () {
-	# Методы аутентификации
+
+	Route::get('', function (){
+		Cache::put('bar', 1, 10);
+		dd(Cache::get('bar'));
+		return;
+	});
+
+	Route::get('/1', 'Instagram\InstagramController@getFeed');
+	Route::get('/post', 'Instagram\InstagramController@post');
+
+	# Auth routs
 	Route::group(['prefix' => 'auth'], function () {
-		# Регистрация пользователя
 		Route::post('signup', 'Auth\AuthController@register');
-		# Логин в систему с получением токена
 		Route::post('login', 'Auth\AuthController@login');
 
 		Route::group(['middleware' => 'jwt.auth'], function () {
-			# Получение данных о пользователе по токену
+			# Get user data by its token
 			Route::get('user', 'Auth\AuthController@user');
-			# Выход из системы(добавления токена в блэклист)
+			# Invalidate user token
 			Route::post('logout', 'Auth\AuthController@logout');
 		});
-		# Обновление текущего токена
+		# Refresh current token
 		Route::group(['middleware' => 'jwt.refresh'], function () {
 			Route::get('/token/refresh', 'Auth\AuthController@refresh');
 		});

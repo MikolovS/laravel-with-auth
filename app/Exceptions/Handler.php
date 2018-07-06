@@ -5,27 +5,30 @@ namespace App\Exceptions;
 use Exception;
 //use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Flugg\Responder\Exceptions\Handler as ExceptionHandler;
+use Flugg\Responder\Exceptions\Http\HttpException;
+use Flugg\Responder\Responder;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * A list of the exception types that are not reported.
-     *
-     * @var array
-     */
-    protected $dontReport = [
-        //
-    ];
+	/**
+	 * A list of the exception types that are not reported.
+	 *
+	 * @var array
+	 */
+	protected $dontReport = [
+		//
+	];
 
-    /**
-     * A list of the inputs that are never flashed for validation exceptions.
-     *
-     * @var array
-     */
-    protected $dontFlash = [
-        'password',
-        'password_confirmation',
-    ];
+	/**
+	 * A list of the inputs that are never flashed for validation exceptions.
+	 *
+	 * @var array
+	 */
+	protected $dontFlash = [
+		'password',
+		'password_confirmation',
+	];
 
 	/**
 	 * Report or log an exception.
@@ -34,20 +37,32 @@ class Handler extends ExceptionHandler
 	 * @return void
 	 * @throws Exception
 	 */
-    public function report(Exception $exception)
-    {
-        parent::report($exception);
-    }
+	public function report (Exception $exception)
+	{
+		parent::report($exception);
+	}
 
-    /**
-     * Render an exception into an HTTP response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function render($request, Exception $exception)
-    {
-        return parent::render($request, $exception);
-    }
+	/**
+	 * Render an exception into an HTTP response.
+	 *
+	 * @param  \Illuminate\Http\Request $request
+	 * @param  \Exception               $exception
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
+	public function render ($request, Exception $exception)
+	{
+		$this->convertDefaultException($exception);
+
+		if ($exception instanceof HttpException) {
+			return $this->renderResponse($exception);
+		}
+
+		if ($exception instanceof UnauthorizedHttpException) {
+			return app(Responder::class)
+				->error($exception->getStatusCode(), $exception->getMessage())
+				->respond($exception->getStatusCode());
+		}
+
+		return parent::render($request, $exception);
+	}
 }
